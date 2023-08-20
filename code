@@ -1,0 +1,31 @@
+from flask import Flask, render_template, request,jsonify
+from flask_cors import CORS,cross_origin
+import requests
+from bs4 import BeautifulSoup as bs
+from urllib.request import urlopen as uReq
+import logging
+logging.basicConfig(filename="scrapper.log" , level=logging.INFO)
+import pymongo
+from pymongo.mongo_client import MongoClient
+book_url="https://books.toscrape.com"
+urlclient=uReq(book_url)
+book_page= urlclient.read()
+book_html=bs(book_page,'html.parser')
+big_box=book_html.find_all(class_ = "product_pod")
+for i in big_box:
+    book_image ="https://books.toscrape.com/"+i.find('img')['src']
+    book_price = i.find_all(class_ = "price_color")[0].text
+    book_rating= i.find('p')['class'][1]
+    book_name=i.find('img')['alt']
+    book_link ="https://books.toscrape.com/"+i.find('a')['href']
+    product_req=requests.get(book_link)
+    product_html = bs(product_req.text,'html.parser')
+    product_discription= product_html.find_all('p')[3].text
+    print("Book name:",book_name)
+    print("Book price:",book_price)
+    print("Book rating:",book_rating,"out of Five")
+    print("Book image:",book_image)
+    print("Book link:",book_link)
+    print("BOOK DESCRIPTION:")
+    print(product_discription)
+    print("-------------------------------------------------")
